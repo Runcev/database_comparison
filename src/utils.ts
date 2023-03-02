@@ -65,3 +65,17 @@ const executeVerticaQuery = (
     });
   });
 };
+
+export const parseQueryExecutionResult = (result: QueryCompareResult) => {
+  const {
+    sql: { time: sqlTime },
+    vertica: { time: verticaTime },
+  } = result;
+
+  return {
+    sqlTime: `${sqlTime} ms`,
+    verticaTime: `${verticaTime} ms`,
+    timeDifference: `${Math.abs(sqlTime - verticaTime)} ms`,
+    result: result.sql.result,
+  };
+};

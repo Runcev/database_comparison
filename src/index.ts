@@ -1,7 +1,10 @@
 import express from "express";
 import mySqlConnection from "./mysql/config";
 import { clearSqlDatabase, initializeSqlDatabase } from "./mysql/utils";
-import {clearVerticaDatabase, initializeVerticaDatabase, verticaQueryExecution} from "./vertica/utils";
+import {
+  clearVerticaDatabase,
+  initializeVerticaDatabase,
+} from "./vertica/utils";
 import router from "./routes/router";
 
 const app = express();

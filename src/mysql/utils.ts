@@ -167,10 +167,102 @@ const productsStoreToValues = (productsStore: ProductsStore) => {
 
 const billsToValues = (bill: Bill) => {
   const { id, storeId, createdAt } = bill;
-  return `(${id}, ${storeId}, '${createdAt.toISOString().split("T")[0]}')`;
+  return `(${id}, ${storeId}, '${getQueryDate(createdAt)}')`;
 };
 
 const productsBillToValues = (productsBill: ProductsBill) => {
   const { id, productId, billId } = productsBill;
   return `(${id}, ${productId}, ${billId})`;
 };
+
+const getQueryDate = (date: Date) => date.toISOString().split("T")[0];
+
+export const getSqlFirstQuery = () => `
+    SELECT COUNT(products_bills.id) AS sold_quantity
+    FROM products_bills
+`;
+
+export const getSqlSecondQuery = () => `
+    SELECT SUM(products.price) AS total_price
+        FROM products
+        JOIN products_bills AS pb ON products.id = pb.product_id 
+`
+export const getSqlThirdQuery = (periodStart: string, periodEnd: string) => `
+    SELECT SUM(products.price) as total_price_by_date_range
+        FROM products
+        JOIN products_bills AS pb ON products.id = pb.product_id
+        JOIN bills ON bills.id = pb.bill_id
+        WHERE bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}';
+`
+export const getSqlFourthQuery = (periodStart: string, periodEnd: string) => `
+     SELECT stores.name, products.name, COUNT(products.name) AS sold_amount
+        FROM products 
+        JOIN products_bills AS pb ON products.id = pb.product_id 
+        JOIN bills ON bills.id = pb.bill_id 
+        JOIN stores ON bills.store_id = stores.id 
+        WHERE bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
+        GROUP BY stores.name, products.name
+        ORDER BY stores.name ASC
+`
+
+export const getSqlFifthQuery = (periodStart: string, periodEnd: string) => `
+    SELECT products.name, COUNT(*) AS total_amount_by_period
+        FROM products
+        JOIN products_bills AS pb ON products.id = pb.product_id 
+        JOIN bills ON bills.id = pb.bill_id 
+        WHERE products.name = 'Fish' AND bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
+        GROUP BY products.name
+`
+
+export const getSqlSixthQuery = (periodStart: string, periodEnd: string) => `
+    SELECT SUM(products.price) as total_revenue_by_period
+        FROM products 
+        JOIN products_bills AS pb ON products.id = pb.product_id
+        JOIN bills ON bills.id = pb.bill_id
+        WHERE bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}';
+`
+
+export const getSqlSeventhQuery = (periodStart: string, periodEnd: string) => `        
+    SELECT p1.name, p2.name, COUNT(*) AS pair_count
+        FROM products_bills pb1
+        JOIN products_bills pb2 ON pb1.bill_id = pb2.bill_id AND pb1.product_id < pb2.product_id
+        JOIN products p1 ON p1.id = pb1.product_id
+        JOIN products p2 ON p2.id = pb2.product_id
+        JOIN bills ON pb1.bill_id = bills.id
+        WHERE pb1.product_id < pb2.product_id AND bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
+        GROUP BY p1.id, p2.id, p1.name, p2.name
+        ORDER BY pair_count DESC
+        LIMIT 10;
+`
+
+export const getSqlEighthQuery = (periodStart: string, periodEnd: string) => `
+    SELECT p1.name, p2.name, p3.name, COUNT(*) AS triplet_count
+        FROM products_bills pb1
+        JOIN products_bills pb2 ON pb1.bill_id = pb2.bill_id AND pb1.product_id < pb2.product_id
+        JOIN products_bills pb3 ON pb2.bill_id = pb3.bill_id AND pb2.product_id < pb3.product_id
+        JOIN products p1 ON p1.id = pb1.product_id
+        JOIN products p2 ON p2.id = pb2.product_id
+        JOIN products p3 ON p3.id = pb3.product_id
+        JOIN bills ON pb1.bill_id = bills.id
+        WHERE pb1.product_id < pb2.product_id AND pb2.product_id < pb3.product_id AND bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
+        GROUP BY p1.id, p2.id, p3.id, p1.name, p2.name, p3.name
+        ORDER BY triplet_count DESC
+        LIMIT 10;
+`
+
+export const getSqlNinthQuery = (periodStart: string, periodEnd: string) => `
+    SELECT p1.name, p2.name, p3.name, p4.name, COUNT(*) AS quadruple_count
+        FROM products_bills pb1
+        JOIN products_bills pb2 ON pb1.bill_id = pb2.bill_id AND pb1.product_id < pb2.product_id
+        JOIN products_bills pb3 ON pb2.bill_id = pb3.bill_id AND pb2.product_id < pb3.product_id
+        JOIN products_bills pb4 ON pb3.bill_id = pb4.bill_id AND pb3.product_id < pb4.product_id
+        JOIN products p1 ON p1.id = pb1.product_id
+        JOIN products p2 ON p2.id = pb2.product_id
+        JOIN products p3 ON p3.id = pb3.product_id
+        JOIN products p4 ON p4.id = pb4.product_id
+        JOIN bills ON pb1.bill_id = bills.id
+        WHERE pb1.product_id < pb2.product_id AND pb2.product_id < pb3.product_id AND pb3.product_id < pb4.product_id AND bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
+        GROUP BY p1.id, p2.id, p3.id, p4.id, p1.name, p2.name, p3.name, p4.name
+        ORDER BY quadruple_count DESC
+        LIMIT 10;
+`
