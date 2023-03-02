@@ -1,20 +1,12 @@
 version: "3.9"
 services:
-  vertica:
+  mysql:
+    image: mysql
+    restart: unless-stopped
     environment:
-      APP_DB_USER: "admin"
-      APP_DB_PASSWORD: "admin"
-      TZ: "Europe/Kyiv"
-    container_name: vertica-ce
-    image: vertica/vertica-ce
+      MYSQL_DATABASE: db_comparison
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
     ports:
-      - "5433:5433"
-      - "5444:5444"
-    deploy:
-      mode: global
-    volumes:
-      - type: volume
-        source: vertica-data2
-        target: /data
-volumes:
-  vertica-data2:
+      - "3307:3306"
