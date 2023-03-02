@@ -96,15 +96,15 @@ export const initializeVerticaDatabase = async () => {
     })
 }
 
-export const verticaQueryExecution = async () => {
-    await verticaClient.query(firstQuery, async (err: { message: any; }, res: { rows: any[] }) => {
-        if (err) {
-            console.error(err.message);
-        } else {
-            console.log(res.rows)
-        }
-    });
-}
+// export const verticaQueryExecution = async () => {
+//     await verticaClient.query(firstQuery, async (err: { message: any; }, res: { rows: any[] }) => {
+//         if (err) {
+//             console.error(err.message);
+//         } else {
+//             console.log(res.rows)
+//         }
+//     });
+// }
 
 const createProductsTableQuery = `
     CREATE TABLE IF NOT EXISTS shop.products (
@@ -155,91 +155,91 @@ const createProductsBillsTableQuery = `
     );
 `;
 
-const firstQuery = `
+export const getVerticaFirstQuery = () => `
     SELECT COUNT(shop.products_bills.id) AS sold_quantity
     FROM shop.products_bills
 `;
 
-const secondQuery = `
+export const getVerticaSecondQuery = () => `
     SELECT SUM(shop.products.price) AS total_price
         FROM shop.products
         JOIN shop.products_bills AS pb ON products.id = pb.product_id 
 `
-const thirdQuery = `
+export const getVerticaThirdQuery = (periodStart: string, periodEnd: string) => `
     SELECT SUM(shop.products.price) as total_price_by_date_range
         FROM shop.products
         JOIN shop.products_bills AS pb ON products.id = pb.product_id
         JOIN shop.bills ON bills.id = pb.bill_id
-        WHERE shop.bills.created_at BETWEEN '2023-02-27' AND '2023-02-28';
+        WHERE shop.bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}';
 `
-const fourthQuery = `
+export const getVerticaFourthQuery = (periodStart: string, periodEnd: string) => `
      SELECT shop.stores.name, shop.products.name, COUNT(shop.products.name) AS sold_amount
         FROM shop.products 
         JOIN shop.products_bills AS pb ON products.id = pb.product_id 
         JOIN shop.bills ON bills.id = pb.bill_id 
         JOIN shop.stores ON shop.bills.store_id = shop.stores.id 
-        WHERE shop.bills.created_at BETWEEN '2023-02-27' AND '2023-02-28'
+        WHERE shop.bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
         GROUP BY shop.stores.name, shop.products.name
         ORDER BY shop.stores.name ASC
 `
 
-const fifthQuery = `
+export const getVerticaFifthQuery = (periodStart: string, periodEnd: string) => `
     SELECT shop.products.name, COUNT(*) AS total_amount_by_period
         FROM shop.products
         JOIN shop.products_bills AS pb ON products.id = pb.product_id 
         JOIN bills ON bills.id = pb.bill_id 
-        WHERE shop.products.name = 'Fish' AND bills.created_at BETWEEN '2023-02-27' AND '2023-02-28'
+        WHERE shop.products.name = 'Fish' AND bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
         GROUP BY shop.products.name
 `
 
-const sixthQuery = `
+export const getVerticaSixthQuery = (periodStart: string, periodEnd: string) => `
     SELECT SUM(shop.products.price) as total_revenue_by_period
         FROM shop.products 
         JOIN shop.products_bills AS pb ON products.id = pb.product_id
         JOIN shop.bills ON bills.id = pb.bill_id
-        WHERE shop.bills.created_at BETWEEN '2023-02-27' AND '2023-02-28';
+        WHERE shop.bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}';
 `
 
-const seventhQuery = `        
+export const getVerticaSeventhQuery = (periodStart: string, periodEnd: string) => `        
     SELECT p1.name, p2.name, COUNT(*) AS pair_count
-        FROM products_bills pb1
-        JOIN products_bills pb2 ON pb1.bill_id = pb2.bill_id AND pb1.product_id < pb2.product_id
-        JOIN products p1 ON p1.id = pb1.product_id
-        JOIN products p2 ON p2.id = pb2.product_id
-        JOIN bills ON pb1.bill_id = bills.id
-        WHERE pb1.product_id < pb2.product_id AND bills.created_at BETWEEN '2023-02-01' AND '2023-02-28'
+        FROM shop.products_bills pb1
+        JOIN shop.products_bills pb2 ON pb1.bill_id = pb2.bill_id AND pb1.product_id < pb2.product_id
+        JOIN shop.products p1 ON p1.id = pb1.product_id
+        JOIN shop.products p2 ON p2.id = pb2.product_id
+        JOIN shop.bills ON pb1.bill_id = bills.id
+        WHERE pb1.product_id < pb2.product_id AND shop.bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
         GROUP BY p1.id, p2.id, p1.name, p2.name
         ORDER BY pair_count DESC
         LIMIT 10;
 `
 
-const eighthQuery = `
+export const getVerticaEighthQuery = (periodStart: string, periodEnd: string) => `
     SELECT p1.name, p2.name, p3.name, COUNT(*) AS triplet_count
-        FROM products_bills pb1
-        JOIN products_bills pb2 ON pb1.bill_id = pb2.bill_id AND pb1.product_id < pb2.product_id
-        JOIN products_bills pb3 ON pb2.bill_id = pb3.bill_id AND pb2.product_id < pb3.product_id
-        JOIN products p1 ON p1.id = pb1.product_id
-        JOIN products p2 ON p2.id = pb2.product_id
-        JOIN products p3 ON p3.id = pb3.product_id
-        JOIN bills ON pb1.bill_id = bills.id
-        WHERE pb1.product_id < pb2.product_id AND pb2.product_id < pb3.product_id AND bills.created_at BETWEEN '2023-02-01' AND '2023-02-28'
+        FROM shop.products_bills pb1
+        JOIN shop.products_bills pb2 ON pb1.bill_id = pb2.bill_id AND pb1.product_id < pb2.product_id
+        JOIN shop.products_bills pb3 ON pb2.bill_id = pb3.bill_id AND pb2.product_id < pb3.product_id
+        JOIN shop.products p1 ON p1.id = pb1.product_id
+        JOIN shop.products p2 ON p2.id = pb2.product_id
+        JOIN shop.products p3 ON p3.id = pb3.product_id
+        JOIN shop.bills ON pb1.bill_id = bills.id
+        WHERE pb1.product_id < pb2.product_id AND pb2.product_id < pb3.product_id AND shop.bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
         GROUP BY p1.id, p2.id, p3.id, p1.name, p2.name, p3.name
         ORDER BY triplet_count DESC
         LIMIT 10;
 `
 
-const ninthQuery = `
+export const getVerticaNinthQuery = (periodStart: string, periodEnd: string) => `
     SELECT p1.name, p2.name, p3.name, p4.name, COUNT(*) AS quadruple_count
-        FROM products_bills pb1
-        JOIN products_bills pb2 ON pb1.bill_id = pb2.bill_id AND pb1.product_id < pb2.product_id
-        JOIN products_bills pb3 ON pb2.bill_id = pb3.bill_id AND pb2.product_id < pb3.product_id
-        JOIN products_bills pb4 ON pb3.bill_id = pb4.bill_id AND pb3.product_id < pb4.product_id
-        JOIN products p1 ON p1.id = pb1.product_id
-        JOIN products p2 ON p2.id = pb2.product_id
-        JOIN products p3 ON p3.id = pb3.product_id
-        JOIN products p4 ON p4.id = pb4.product_id
-        JOIN bills ON pb1.bill_id = bills.id
-        WHERE pb1.product_id < pb2.product_id AND pb2.product_id < pb3.product_id AND pb3.product_id < pb4.product_id AND bills.created_at BETWEEN '2023-02-01' AND '2023-02-28'
+        FROM shop.products_bills pb1
+        JOIN shop.products_bills pb2 ON pb1.bill_id = pb2.bill_id AND pb1.product_id < pb2.product_id
+        JOIN shop.products_bills pb3 ON pb2.bill_id = pb3.bill_id AND pb2.product_id < pb3.product_id
+        JOIN shop.products_bills pb4 ON pb3.bill_id = pb4.bill_id AND pb3.product_id < pb4.product_id
+        JOIN shop.products p1 ON p1.id = pb1.product_id
+        JOIN shop.products p2 ON p2.id = pb2.product_id
+        JOIN shop.products p3 ON p3.id = pb3.product_id
+        JOIN shop.products p4 ON p4.id = pb4.product_id
+        JOIN shop.bills ON pb1.bill_id = bills.id
+        WHERE pb1.product_id < pb2.product_id AND pb2.product_id < pb3.product_id AND pb3.product_id < pb4.product_id AND shop.bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
         GROUP BY p1.id, p2.id, p3.id, p4.id, p1.name, p2.name, p3.name, p4.name
         ORDER BY quadruple_count DESC
         LIMIT 10;
