@@ -183,20 +183,20 @@ export const getVerticaFourthQuery = (periodStart: string, periodEnd: string) =>
         ORDER BY shop.stores.name ASC
 `
 
-export const getVerticaFifthQuery = (periodStart: string, periodEnd: string) => `
+export const getVerticaFifthQuery = (product: string, periodStart: string, periodEnd: string) => `
     SELECT shop.products.name, COUNT(*) AS total_amount_by_period
         FROM shop.products
-        JOIN shop.products_bills AS pb ON products.id = pb.product_id 
-        JOIN bills ON bills.id = pb.bill_id 
-        WHERE shop.products.name = 'Fish' AND bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
+        JOIN shop.products_bills AS pb ON shop.products.id = pb.product_id 
+        JOIN shop.bills ON shop.bills.id = pb.bill_id 
+        WHERE shop.products.name = '${product}' AND shop.bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
         GROUP BY shop.products.name
 `
 
 export const getVerticaSixthQuery = (periodStart: string, periodEnd: string) => `
     SELECT SUM(shop.products.price) as total_revenue_by_period
         FROM shop.products 
-        JOIN shop.products_bills AS pb ON products.id = pb.product_id
-        JOIN shop.bills ON bills.id = pb.bill_id
+        JOIN shop.products_bills AS pb ON shop.products.id = pb.product_id
+        JOIN shop.bills ON shop.bills.id = pb.bill_id
         WHERE shop.bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}';
 `
 
@@ -206,7 +206,7 @@ export const getVerticaSeventhQuery = (periodStart: string, periodEnd: string) =
         JOIN shop.products_bills pb2 ON pb1.bill_id = pb2.bill_id AND pb1.product_id < pb2.product_id
         JOIN shop.products p1 ON p1.id = pb1.product_id
         JOIN shop.products p2 ON p2.id = pb2.product_id
-        JOIN shop.bills ON pb1.bill_id = bills.id
+        JOIN shop.bills ON pb1.bill_id = shop.bills.id
         WHERE pb1.product_id < pb2.product_id AND shop.bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
         GROUP BY p1.id, p2.id, p1.name, p2.name
         ORDER BY pair_count DESC
@@ -221,7 +221,7 @@ export const getVerticaEighthQuery = (periodStart: string, periodEnd: string) =>
         JOIN shop.products p1 ON p1.id = pb1.product_id
         JOIN shop.products p2 ON p2.id = pb2.product_id
         JOIN shop.products p3 ON p3.id = pb3.product_id
-        JOIN shop.bills ON pb1.bill_id = bills.id
+        JOIN shop.bills ON pb1.bill_id = shop.bills.id
         WHERE pb1.product_id < pb2.product_id AND pb2.product_id < pb3.product_id AND shop.bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
         GROUP BY p1.id, p2.id, p3.id, p1.name, p2.name, p3.name
         ORDER BY triplet_count DESC
@@ -238,7 +238,7 @@ export const getVerticaNinthQuery = (periodStart: string, periodEnd: string) => 
         JOIN shop.products p2 ON p2.id = pb2.product_id
         JOIN shop.products p3 ON p3.id = pb3.product_id
         JOIN shop.products p4 ON p4.id = pb4.product_id
-        JOIN shop.bills ON pb1.bill_id = bills.id
+        JOIN shop.bills ON pb1.bill_id = shop.bills.id
         WHERE pb1.product_id < pb2.product_id AND pb2.product_id < pb3.product_id AND pb3.product_id < pb4.product_id AND shop.bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
         GROUP BY p1.id, p2.id, p3.id, p4.id, p1.name, p2.name, p3.name, p4.name
         ORDER BY quadruple_count DESC

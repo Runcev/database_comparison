@@ -56,10 +56,10 @@ export const productsSoldAmountStorePeriod = async (req: Request, res: Response)
 };
 
 export const productsSoldAmountAllStoresPeriod = async (req: Request, res: Response) => {
-  const { periodStart, periodEnd } = req.query;
+  const { product, periodStart, periodEnd } = req.query;
   const result = await executeQueryAndCompare(
-    getSqlFifthQuery(String(periodStart), String(periodEnd)),
-    getVerticaFifthQuery(String(periodStart), String(periodEnd)),
+    getSqlFifthQuery(String(product), String(periodStart), String(periodEnd)),
+    getVerticaFifthQuery(String(product), String(periodStart), String(periodEnd)),
   );
 
   return res.json(parseQueryExecutionResult(result));

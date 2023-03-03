@@ -76,6 +76,6 @@ export const parseQueryExecutionResult = (result: QueryCompareResult) => {
     sqlTime: `${sqlTime} ms`,
     verticaTime: `${verticaTime} ms`,
     timeDifference: `${Math.abs(sqlTime - verticaTime)} ms`,
-    result: result.sql.result,
+    result: result.vertica.result,
   };
 };

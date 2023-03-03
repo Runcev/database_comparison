@@ -205,12 +205,12 @@ export const getSqlFourthQuery = (periodStart: string, periodEnd: string) => `
         ORDER BY stores.name ASC
 `
 
-export const getSqlFifthQuery = (periodStart: string, periodEnd: string) => `
+export const getSqlFifthQuery = (product: string, periodStart: string, periodEnd: string) => `
     SELECT products.name, COUNT(*) AS total_amount_by_period
         FROM products
         JOIN products_bills AS pb ON products.id = pb.product_id 
         JOIN bills ON bills.id = pb.bill_id 
-        WHERE products.name = 'Fish' AND bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
+        WHERE products.name = '${product}' AND bills.created_at BETWEEN '${periodStart}' AND '${periodEnd}'
         GROUP BY products.name
 `
 
